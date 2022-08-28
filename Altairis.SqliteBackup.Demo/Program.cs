@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using Altairis.SqliteBackup;
 using Altairis.SqliteBackup.Demo.Data;
 using Microsoft.EntityFrameworkCore;
@@ -5,12 +6,15 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Setup backup of Sqlite database with upload to local site
-builder.Services.AddSqliteBackupService(builder.Configuration.GetConnectionString("DefaultConnection"), options => {
+builder.Services.AddSqliteBackup(builder.Configuration.GetConnectionString("DefaultConnection"), options => {
     options.BackupInterval = TimeSpan.FromSeconds(10);
     options.CheckInterval = TimeSpan.FromSeconds(3);
     options.BackupFolder = "App_Data/Backup";
     options.NumberOfBackupFiles = 3;
-}).WithHttpUpload(new Uri("http://localhost:5000/receive-file"));
+    options.CompressionLevel = System.IO.Compression.CompressionLevel.Optimal;
+    options.BackupFileExtension = ".bak.gz";
+});
+builder.Services.AddSqliteBackupHttpUpload(new Uri("http://localhost:5000/receive-file"));
 
 // Register DB context
 builder.Services.AddDbContext<DemoDbContext>(options => {
