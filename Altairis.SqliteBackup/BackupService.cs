@@ -50,25 +50,26 @@ public class BackupService : BackgroundService {
                 // Delete extra files
                 this.PerformCleanup();
                 // Call backup processor if configured
-                if (fileName != null && this.backupProcessor != null) this.backupProcessor.ProcessBackupFile(fileName);
+                if (fileName != null && this.backupProcessor != null) await this.backupProcessor.ProcessBackupFile(fileName);
             }
             await Task.Delay(this.options.CheckInterval, stoppingToken);
         }
     }
 
     private async Task<string?> PerformBackup(CancellationToken stoppingToken) {
-        // Create connection string
+        // Create backup file name
         var backupFileName = Path.Combine(this.backupFolder, this.backupFileNamePrefix + "_" + DateTime.Now.ToString(TimestampFormat) + this.options.BackupFileExtension);
-        var backupConnectionString = new SqliteConnectionStringBuilder() { DataSource = backupFileName }.ToString();
 
         // Perform backup
-        this.logger.LogInformation("Performing backup into file {backupFileName}.", backupFileName);
         try {
-            using var oldDb = new SqliteConnection(this.readOnlyConnectionString);
-            using var newDb = new SqliteConnection(backupConnectionString);
-            await oldDb.OpenAsync(stoppingToken);
-            oldDb.BackupDatabase(newDb);
-            await oldDb.CloseAsync();
+            this.logger.LogInformation("Performing backup into file {backupFileName}.", backupFileName);
+            using var db = new SqliteConnection(this.readOnlyConnectionString);
+            await db.OpenAsync(stoppingToken);
+            var cmd = db.CreateCommand();
+            cmd.CommandText = "VACUUM INTO @FileName";
+            cmd.Parameters.AddWithValue("@FileName", backupFileName);
+            await cmd.ExecuteNonQueryAsync();
+            await db.CloseAsync();
             return backupFileName;
         } catch (Exception ex) {
             this.logger.LogError(ex, "Exception while performing database backup.");
