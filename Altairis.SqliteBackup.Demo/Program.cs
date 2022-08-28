@@ -4,15 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Setup backup of Sqlite database
-builder.Services.AddSingleton(new BackupServiceOptions(builder.Configuration.GetConnectionString("DefaultConnection")) {
-    BackupInterval = TimeSpan.FromSeconds(10),
-    CheckInterval = TimeSpan.FromSeconds(3),
-    NumberOfBackupFiles = 3,
-}); ;
-builder.Services.AddSingleton(new HttpUploadBackupProcessorOptions(new Uri("http://localhost:5000/receive-file")));
-builder.Services.AddSingleton<IBackupProcessor, HttpUploadBackupProcessor>();
-builder.Services.AddHostedService<BackupService>();
+// Setup backup of Sqlite database with upload to local site
+builder.Services.AddSqliteBackupService(builder.Configuration.GetConnectionString("DefaultConnection"), options => {
+    options.BackupInterval = TimeSpan.FromSeconds(10);
+    options.CheckInterval = TimeSpan.FromSeconds(3);
+    options.BackupFolder = "App_Data/Backup";
+    options.NumberOfBackupFiles = 3;
+}).WithHttpUpload(new Uri("http://localhost:5000/receive-file"));
 
 // Register DB context
 builder.Services.AddDbContext<DemoDbContext>(options => {

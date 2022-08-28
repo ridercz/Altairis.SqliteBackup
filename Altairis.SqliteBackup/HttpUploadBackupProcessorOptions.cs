@@ -8,10 +8,6 @@ public class HttpUploadBackupProcessorOptions {
 
     public Uri TargetUri { get; set; }
 
-    public string? UserName { get; set; }
-
-    public string? Password { get; set; }
-
     public string ContentType { get; set; } = "application/vnd.sqlite3";
 
     public string FieldName { get; set; } = "backupFile";
