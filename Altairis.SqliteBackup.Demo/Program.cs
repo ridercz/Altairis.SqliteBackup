@@ -17,6 +17,9 @@ builder.Services.AddDbContext<DemoDbContext>(options => {
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// Register MVC controllers
+builder.Services.AddControllers();
+
 // Build app and migrate database to latest version and record startup time just so we have some data
 var app = builder.Build();
 using var scope = app.Services.CreateScope();
@@ -25,6 +28,6 @@ dc.Database.Migrate();
 dc.StartupTimes.Add(new StartupTime { Time = DateTime.Now });
 dc.SaveChanges();
 
-// Show simple message and run application
-app.MapGet("/", () => "This web app does not do anything, just backs up the Sqlite database -- see console log.");
+// Map controllers and run application
+app.MapControllers();
 app.Run();
