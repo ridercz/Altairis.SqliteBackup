@@ -6,10 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Setup backup of Sqlite database
 builder.Services.AddSingleton(new BackupServiceOptions(builder.Configuration.GetConnectionString("DefaultConnection")) {
-    BackupInterval = TimeSpan.FromMinutes(1),   // Backup every minute
-    CheckInterval = TimeSpan.FromSeconds(10),   // Check for backup every 10 seconds
-    NumberOfBackupFiles = 3,                    // Keep last 3 backup files
-});
+    BackupInterval = TimeSpan.FromSeconds(10),
+    CheckInterval = TimeSpan.FromSeconds(3),
+    NumberOfBackupFiles = 3,
+}); ;
+builder.Services.AddSingleton(new HttpUploadBackupProcessorOptions(new Uri("http://localhost:5000/receive-file")));
+builder.Services.AddSingleton<IBackupProcessor, HttpUploadBackupProcessor>();
 builder.Services.AddHostedService<BackupService>();
 
 // Register DB context
