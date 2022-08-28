@@ -65,7 +65,8 @@ public class BackupService : BackgroundService {
 
     private async Task<string?> PerformBackup(CancellationToken stoppingToken) {
         // Create backup file name
-        var backupFileName = Path.Combine(this.backupFolder, this.backupFileNamePrefix + "_" + DateTime.Now.ToString(TimestampFormat) + this.options.BackupFileExtension);
+        var ts = this.options.UseLocalTime ? DateTime.Now : DateTime.UtcNow;
+        var backupFileName = Path.Combine(this.backupFolder, this.backupFileNamePrefix + "_" + ts.ToString(TimestampFormat) + this.options.BackupFileExtension);
 
         // Perform backup
         try {
@@ -75,7 +76,7 @@ public class BackupService : BackgroundService {
             var cmd = db.CreateCommand();
             cmd.CommandText = "VACUUM INTO @FileName";
             cmd.Parameters.AddWithValue("@FileName", backupFileName);
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(stoppingToken);
             await db.CloseAsync();
             return backupFileName;
         } catch (Exception ex) {
@@ -144,7 +145,7 @@ public class BackupService : BackgroundService {
         try {
             var newestFileName = existingFiles.OrderByDescending(x => x.Name).First().Name;
             var newestTimestamp = newestFileName[(this.backupFileNamePrefix.Length + 1)..^this.options.BackupFileExtension.Length];
-            return DateTime.ParseExact(newestTimestamp, TimestampFormat, CultureInfo.InvariantCulture);
+            return DateTime.ParseExact(newestTimestamp, TimestampFormat, CultureInfo.InvariantCulture, this.options.UseLocalTime ? DateTimeStyles.AssumeLocal : DateTimeStyles.AssumeUniversal);
         } catch (Exception) {
             return DateTime.MinValue;
         }

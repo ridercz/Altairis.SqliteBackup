@@ -1,4 +1,3 @@
-using System.IO.Compression;
 using Altairis.SqliteBackup;
 using Altairis.SqliteBackup.Demo.Data;
 using Microsoft.EntityFrameworkCore;

@@ -20,6 +20,8 @@ public class BackupServiceOptions {
 
     public int NumberOfBackupFiles { get; set; } = 7;
 
+    public bool UseLocalTime { get; set; } = false;
+
     public Action<string?>? AfterBackupAction { get; set; }
 
     public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.NoCompression;
