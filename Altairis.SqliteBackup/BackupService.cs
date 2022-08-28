@@ -10,14 +10,16 @@ public class BackupService : BackgroundService {
 
     private readonly BackupServiceOptions options;
     private readonly ILogger<BackupService> logger;
+    private readonly IBackupProcessor? backupProcessor;
     private readonly string backupFolder;
     private readonly string backupFileNamePrefix;
     private readonly string readOnlyConnectionString;
 
-    public BackupService(BackupServiceOptions options, ILogger<BackupService> logger) {
+    public BackupService(BackupServiceOptions options, ILogger<BackupService> logger, IBackupProcessor? backupProcessor = null) {
         // Read options
         this.options = options;
         this.logger = logger;
+        this.backupProcessor = backupProcessor;
 
         // Create read-only connection string
         this.readOnlyConnectionString = new SqliteConnectionStringBuilder(this.options.ConnectionString) { Mode = SqliteOpenMode.ReadOnly }.ToString();
@@ -47,6 +49,8 @@ public class BackupService : BackgroundService {
                 this.options.AfterBackupAction?.Invoke(fileName);
                 // Delete extra files
                 this.PerformCleanup();
+                // Call backup processor if configured
+                if (fileName != null && this.backupProcessor != null) this.backupProcessor.ProcessBackupFile(fileName);
             }
             await Task.Delay(this.options.CheckInterval, stoppingToken);
         }
@@ -83,7 +87,11 @@ public class BackupService : BackgroundService {
         var filesToDelete = existingFiles.OrderByDescending(f => f.Name).Skip(this.options.NumberOfBackupFiles);
         foreach (var file in filesToDelete) {
             this.logger.LogInformation("Deleting old backup file {fileName}.", file.FullName);
-            file.Delete();
+            try {
+                file.Delete();
+            } catch (IOException ioex) {
+                this.logger.LogError(ioex, "Error while deleting old backup file {fileName}.", file.FullName);
+            }
         }
     }
 
