@@ -1,4 +1,6 @@
-﻿namespace Altairis.SqliteBackup;
+﻿using System.IO.Compression;
+
+namespace Altairis.SqliteBackup;
 
 public class BackupServiceOptions {
 
@@ -19,5 +21,7 @@ public class BackupServiceOptions {
     public int NumberOfBackupFiles { get; set; } = 7;
 
     public Action<string?>? AfterBackupAction { get; set; }
+
+    public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.NoCompression;
 
 }

@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.IO.Compression;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -45,10 +46,16 @@ public class BackupService : BackgroundService {
             if (timeToBackup <= TimeSpan.Zero) {
                 // Backup database and get backup file name
                 var fileName = await this.PerformBackup(stoppingToken);
+
+                // Compress backup when requested
+                if (fileName != null && this.options.CompressionLevel != CompressionLevel.NoCompression) await this.PerformCompression(fileName, stoppingToken);
+
                 // Perform after-backup action
                 this.options.AfterBackupAction?.Invoke(fileName);
+
                 // Delete extra files
                 this.PerformCleanup();
+
                 // Call backup processor if configured
                 if (fileName != null && this.backupProcessor != null) await this.backupProcessor.ProcessBackupFile(fileName);
             }
@@ -75,6 +82,33 @@ public class BackupService : BackgroundService {
             this.logger.LogError(ex, "Exception while performing database backup.");
             return null;
         }
+    }
+
+    private async Task PerformCompression(string sourceFileName, CancellationToken stoppingToken) {
+        // Open source file
+        var sourceFile = new FileInfo(sourceFileName);
+        var originalSize = sourceFile.Length;
+        var sourceStream = sourceFile.OpenRead();
+
+        // Create temp file
+        var tempFile = new FileInfo(sourceFileName + ".tmp");
+        var tempStream = tempFile.Create();
+
+        // Create GZip compression and compress data
+        var gzipStream = new GZipStream(tempStream, this.options.CompressionLevel);
+        await sourceStream.CopyToAsync(gzipStream, stoppingToken);
+
+        // Close all streams
+        gzipStream.Close();
+        tempStream.Close();
+        sourceStream.Close();
+        var compressedSize = tempFile.Length;
+
+        // Rename temp file
+        sourceFile.Delete();
+        tempFile.MoveTo(sourceFileName);
+
+        this.logger.LogInformation("Compressed {fileName} from {originalSize} bytes to {compressedSize} bytes.", sourceFileName, originalSize, compressedSize);
     }
 
     private void PerformCleanup() {
