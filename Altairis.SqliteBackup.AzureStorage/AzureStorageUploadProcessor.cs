@@ -2,12 +2,12 @@
 using Microsoft.Extensions.Logging;
 
 namespace Altairis.SqliteBackup.AzureStorage;
-public class AzureStorageBackupProcessor : IBackupProcessor {
+public class AzureStorageUploadProcessor : IBackupProcessor {
 
-    private readonly AzureStorageBackupProcessorOptions options;
-    private readonly ILogger<AzureStorageBackupProcessor> logger;
+    private readonly AzureStorageUploadProcessorOptions options;
+    private readonly ILogger<AzureStorageUploadProcessor> logger;
 
-    public AzureStorageBackupProcessor(AzureStorageBackupProcessorOptions options, ILogger<AzureStorageBackupProcessor> logger) {
+    public AzureStorageUploadProcessor(AzureStorageUploadProcessorOptions options, ILogger<AzureStorageUploadProcessor> logger) {
         this.options = options;
         this.logger = logger;
     }

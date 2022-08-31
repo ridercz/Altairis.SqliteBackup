@@ -1,9 +1,9 @@
 ﻿namespace Altairis.SqliteBackup.AzureStorage;
 
-public class AzureStorageBackupProcessorOptions {
+public class AzureStorageUploadProcessorOptions {
     private const string DefaultContainerName = "sqlitebackup";
 
-    public AzureStorageBackupProcessorOptions(string connectionString) {
+    public AzureStorageUploadProcessorOptions(string connectionString) {
         this.ConnectionString = connectionString;
     }
 

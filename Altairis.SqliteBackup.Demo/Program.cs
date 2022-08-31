@@ -1,6 +1,5 @@
 using Altairis.SqliteBackup;
 using Altairis.SqliteBackup.AzureStorage;
-using Altairis.SqliteBackup.BackupProcessors;
 using Altairis.SqliteBackup.Demo.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,12 +11,13 @@ builder.Services.AddSqliteBackup(builder.Configuration.GetConnectionString("Defa
     options.CheckInterval = TimeSpan.FromSeconds(3);
     options.FolderName = "App_Data/Backup";
     options.FileExtension = ".bak";
-});
-builder.Services.AddSingleton<IBackupProcessor>(sp => new GZipProcessor(new GZipBackupProcessorOptions(), sp.GetRequiredService<ILogger<GZipProcessor>>()) { Priority = 0 });
-builder.Services.AddSingleton<IBackupProcessor>(sp => new HttpUploadProcessor(new HttpUploadBackupProcessorOptions(new Uri("http://localhost:5000/receive-file")), sp.GetRequiredService<ILogger<HttpUploadProcessor>>()) { Priority = 1 });
-builder.Services.AddSingleton<IBackupProcessor>(sp => new AzureStorageBackupProcessor(new AzureStorageBackupProcessorOptions(builder.Configuration.GetConnectionString("AzureStorageSAS")), sp.GetRequiredService<ILogger<AzureStorageBackupProcessor>>()) { Priority = 2 });
-builder.Services.AddSingleton<IBackupProcessor>(sp => new FileCleanupProcessor("*.bak", 0, sp.GetRequiredService<ILogger<FileCleanupProcessor>>()) { Priority = 3 });
-builder.Services.AddSingleton<IBackupProcessor>(sp => new FileCleanupProcessor("*.bak.gz", 3, sp.GetRequiredService<ILogger<FileCleanupProcessor>>()) { Priority = 4 });
+    options.UseChecksum = true;
+})
+    .WithGZip()
+    .WithHttpUpload("http://localhost:5000/receive-file")
+    .WithAzureStorageUpload(builder.Configuration.GetConnectionString("AzureStorageSAS"))
+    .WithFileCleanup("*.bak", 0)
+    .WithFileCleanup("*.bak.gz", 3);
 
 // Register DB context
 builder.Services.AddDbContext<DemoDbContext>(options => {
