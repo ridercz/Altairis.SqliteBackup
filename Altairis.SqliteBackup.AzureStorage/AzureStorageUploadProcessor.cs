@@ -1,4 +1,5 @@
 ﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Altairis.SqliteBackup.AzureStorage;
@@ -23,7 +24,12 @@ public class AzureStorageUploadProcessor : IBackupProcessor {
             // Create a blob
             var blob = container.GetBlobClient(Path.GetFileName(backupFilePath));
             this.logger.LogInformation("Uploading {backupFilePath} to blob {blobUri}.", backupFilePath, blob.Uri.AbsoluteUri);
-            _ = await blob.UploadAsync(backupFilePath, cancellationToken);
+            var options = new BlobUploadOptions {
+                HttpHeaders = new BlobHttpHeaders {
+                    ContentType = this.options.ContentType
+                }
+            };
+            _ = await blob.UploadAsync(backupFilePath, options, cancellationToken);
         } catch (Exception ex) {
             this.logger.LogError(ex, "Exception while uploading backup file to Azure Storage.");
         }
