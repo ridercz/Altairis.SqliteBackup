@@ -11,14 +11,28 @@
 		<Company>Altairis, s. r. o.</Company>
 		<Description>Automated backup of Sqlite databases for ASP.NET Core web applications.</Description>
 		<Copyright>(c) Michal A. Valášek - Altairis, 2022</Copyright>
-		<PackageLicenseUrl>https://raw.githubusercontent.com/ridercz/Altairis.SqliteBackup/master/LICENSE</PackageLicenseUrl>
 		<PackageProjectUrl>https://github.com/ridercz/Altairis.SqliteBackup</PackageProjectUrl>
 		<Version>1.0.0</Version>
 		<Product>Altairis Sqlite Backup</Product>
 		<RepositoryUrl>https://github.com/ridercz/Altairis.SqliteBackup.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageIconUrl>https://raw.githubusercontent.com/ridercz/Altairis.SqliteBackup/master/NuGet-64x64.png</PackageIconUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageIcon>NuGet-64x64.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\NuGet-64x64.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="6.0.8" />

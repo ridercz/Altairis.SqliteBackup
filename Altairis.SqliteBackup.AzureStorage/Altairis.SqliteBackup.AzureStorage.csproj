@@ -1,31 +1,46 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	  <TargetFramework>net6.0</TargetFramework>
-	  <ImplicitUsings>enable</ImplicitUsings>
-	  <Nullable>enable</Nullable>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	  <PackageId>Altairis.SqliteBackup.AzureStorage</PackageId>
-	  <Title>Altairis Sqlite Backup - Azure Storage Upload</Title>
-	  <Authors>Michal Altair Valášek</Authors>
-	  <Company>Altairis, s. r. o.</Company>
-	  <Description>Azuer Storage support for automated backup of Sqlite databases for ASP.NET Core web applications.</Description>
-	  <Copyright>(c) Michal A. Valášek - Altairis, 2022</Copyright>
-	  <PackageLicenseUrl>https://raw.githubusercontent.com/ridercz/Altairis.SqliteBackup/master/LICENSE</PackageLicenseUrl>
-	  <PackageProjectUrl>https://github.com/ridercz/Altairis.SqliteBackup</PackageProjectUrl>
-	  <Version>1.0.0</Version>
-	  <Product>Altairis Sqlite Backup</Product>
-	  <RepositoryUrl>https://github.com/ridercz/Altairis.SqliteBackup.git</RepositoryUrl>
-	  <RepositoryType>git</RepositoryType>
-	  <PackageIconUrl>https://raw.githubusercontent.com/ridercz/Altairis.SqliteBackup/master/NuGet-64x64.png</PackageIconUrl>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>Altairis.SqliteBackup.AzureStorage</PackageId>
+		<Title>Altairis Sqlite Backup - Azure Storage Upload</Title>
+		<Authors>Michal Altair Valášek</Authors>
+		<Company>Altairis, s. r. o.</Company>
+		<Description>Azuer Storage support for automated backup of Sqlite databases for ASP.NET Core web applications.</Description>
+		<Copyright>(c) Michal A. Valášek - Altairis, 2022</Copyright>
+		<PackageProjectUrl>https://github.com/ridercz/Altairis.SqliteBackup</PackageProjectUrl>
+		<Version>1.0.0</Version>
+		<Product>Altairis Sqlite Backup</Product>
+		<RepositoryUrl>https://github.com/ridercz/Altairis.SqliteBackup.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageIcon>NuGet-64x64.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.13.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\NuGet-64x64.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Altairis.SqliteBackup\Altairis.SqliteBackup.csproj" />
-  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.13.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Altairis.SqliteBackup\Altairis.SqliteBackup.csproj" />
+	</ItemGroup>
 
 </Project>
