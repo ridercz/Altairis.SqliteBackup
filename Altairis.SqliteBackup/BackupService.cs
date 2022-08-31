@@ -1,10 +1,8 @@
 ﻿using System.Globalization;
-using System.IO.Compression;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
 
 namespace Altairis.SqliteBackup;
 

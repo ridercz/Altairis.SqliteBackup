@@ -1,6 +1,4 @@
-﻿using System.IO.Compression;
-
-namespace Altairis.SqliteBackup;
+﻿namespace Altairis.SqliteBackup;
 
 public class BackupServiceOptions {
     private const string DefaultFileExtension = ".bak";

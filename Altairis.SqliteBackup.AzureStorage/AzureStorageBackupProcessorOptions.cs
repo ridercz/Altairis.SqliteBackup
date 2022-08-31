@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Altairis.SqliteBackup.AzureStorage;
+﻿namespace Altairis.SqliteBackup.AzureStorage;
 
 public class AzureStorageBackupProcessorOptions {
     private const string DefaultContainerName = "sqlitebackup";
