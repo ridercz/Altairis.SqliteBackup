@@ -10,6 +10,7 @@ public class GZipProcessor : IBackupProcessor {
     public GZipProcessor(GZipProcessorOptions options, ILogger<GZipProcessor> logger) {
         this.options = options;
         this.logger = logger;
+        if (string.IsNullOrEmpty(this.options.AddExtension)) throw new Exception("AddExtension value cannot be empty");
     }
 
     public int Priority { get; set; }
@@ -39,6 +40,13 @@ public class GZipProcessor : IBackupProcessor {
             outputFile.FullName,
             outputFile.Length);
 
+        // Delete original file
+        try {
+            if (this.options.DeleteUncompressedFile) inputFile.Delete();
+        } catch (IOException ioex) {
+            this.logger.LogError(ioex, "Error while deleting uncompressed file {fileName}.", inputFile.FullName);
+        }
+
         return outputFile.FullName;
     }
 }
@@ -50,5 +58,7 @@ public class GZipProcessorOptions {
     public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Optimal;
 
     public string AddExtension { get; set; } = DefaultAddExtension;
+
+    public bool DeleteUncompressedFile { get; set; } = true;
 
 }

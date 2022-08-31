@@ -16,7 +16,6 @@ builder.Services.AddSqliteBackup(builder.Configuration.GetConnectionString("Defa
     .WithGZip()
     .WithHttpUpload("http://localhost:5000/receive-file")
     .WithAzureStorageUpload(builder.Configuration.GetConnectionString("AzureStorageSAS"))
-    .WithFileCleanup("*.bak", 0)
     .WithFileCleanup("*.bak.gz", 3);
 
 // Register DB context
