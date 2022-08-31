@@ -125,3 +125,4 @@ orleans.codegen.cs
 *.bak
 *.bak.gz
 *.lastHash
+*.lastTime

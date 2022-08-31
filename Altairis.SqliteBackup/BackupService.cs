@@ -9,6 +9,7 @@ namespace Altairis.SqliteBackup;
 public class BackupService : BackgroundService {
     private const string TimestampFormat = "yyyyMMddHHmmss";
     private const string HashFileExtension = ".lastHash";
+    private const string TimestampFileExtension = ".lastTime";
 
     private readonly BackupServiceOptions options;
     private readonly ILogger<BackupService> logger;
@@ -42,7 +43,12 @@ public class BackupService : BackgroundService {
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
         while (!stoppingToken.IsCancellationRequested) {
-            var lastBackupTime = this.GetLastBackupTime();
+            // Get last timestamp
+            var lastBackupTimeFileName = Path.Combine(this.backupFolder, this.backupFileNamePrefix + TimestampFileExtension);
+            var lastBackupTimeString = File.Exists(lastBackupTimeFileName) ? await File.ReadAllTextAsync(lastBackupTimeFileName, stoppingToken) : DateTime.MinValue.ToString("s");
+            var lastBackupTime = DateTime.ParseExact(lastBackupTimeString, "s", CultureInfo.InvariantCulture);
+
+            // Check if it's time to backup
             var nextBackupTime = lastBackupTime.Add(this.options.BackupInterval);
             var timeToBackup = nextBackupTime.Subtract(DateTime.Now);
             this.logger.LogDebug("Last backup is from {lastBackupTime}, next backup scheduled for {nextBackupTime} (in {timeToBackup}).", lastBackupTime, nextBackupTime, timeToBackup);
@@ -106,26 +112,14 @@ public class BackupService : BackgroundService {
             cmd.Parameters.AddWithValue("@FileName", backupFileName);
             await cmd.ExecuteNonQueryAsync(stoppingToken);
             await db.CloseAsync();
+
+            // Update last backup time
+            var lastBackupTimeFileName = Path.Combine(this.backupFolder, this.backupFileNamePrefix + TimestampFileExtension);
+            await File.WriteAllTextAsync(lastBackupTimeFileName, DateTime.Now.ToString("s"), stoppingToken);
             return backupFileName;
         } catch (Exception ex) {
             this.logger.LogError(ex, "Exception while performing database backup.");
             return null;
-        }
-    }
-
-    private DateTime GetLastBackupTime() {
-        // Get list of existing backup files
-        var backupFileNamePattern = this.backupFileNamePrefix + "_" + new string('?', TimestampFormat.Length) + this.options.FileExtension;
-        var existingFiles = new DirectoryInfo(this.backupFolder).GetFiles(backupFileNamePattern, SearchOption.TopDirectoryOnly);
-        if (!existingFiles.Any()) return DateTime.MinValue;
-
-        // Get newest timestamp
-        try {
-            var newestFileName = existingFiles.OrderByDescending(x => x.Name).First().Name;
-            var newestTimestamp = newestFileName[(this.backupFileNamePrefix.Length + 1)..^this.options.FileExtension.Length];
-            return DateTime.ParseExact(newestTimestamp, TimestampFormat, CultureInfo.InvariantCulture, this.options.UseLocalTime ? DateTimeStyles.AssumeLocal : DateTimeStyles.AssumeUniversal);
-        } catch (Exception) {
-            return DateTime.MinValue;
         }
     }
 
