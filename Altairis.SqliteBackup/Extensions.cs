@@ -14,16 +14,23 @@ public static class Extensions {
         return new BackupServiceBuilder(services, options);
     }
 
-    public static BackupServiceBuilder WithFileCleanup(this BackupServiceBuilder builder, string mask, int fileCount) {
-        builder.Services.AddSingleton<IBackupProcessor>(sp => new FileCleanupProcessor(mask, fileCount, sp.GetRequiredService<ILogger<FileCleanupProcessor>>()) { Priority = builder.NextProcessorPriority });
+    public static BackupServiceBuilder WithProcessor<TProcessor>(this BackupServiceBuilder builder, Func<IServiceProvider, IBackupProcessor> implementationFactory) where TProcessor: IBackupProcessor {
+        builder.Services.AddSingleton<IBackupProcessor>(sp => {
+            var p = implementationFactory(sp);
+            p.Priority = builder.NextProcessorPriority;
+            return p;
+        });
         return builder.Next();
     }
+
+    // Specific processor implementation
+
+    public static BackupServiceBuilder WithFileCleanup(this BackupServiceBuilder builder, string mask, int fileCount) => builder.WithProcessor<FileCleanupProcessor>(sp => new FileCleanupProcessor(mask, fileCount, sp.GetRequiredService<ILogger<FileCleanupProcessor>>()));
 
     public static BackupServiceBuilder WithGZip(this BackupServiceBuilder builder, Action<GZipProcessorOptions>? configureOptions = null) {
         var options = new GZipProcessorOptions();
         configureOptions?.Invoke(options);
-        builder.Services.AddSingleton<IBackupProcessor>(sp => new GZipProcessor(options, sp.GetRequiredService<ILogger<GZipProcessor>>()) { Priority = builder.NextProcessorPriority });
-        return builder.Next();
+        return builder.WithProcessor<GZipProcessor>(sp => new GZipProcessor(options, sp.GetRequiredService<ILogger<GZipProcessor>>())));
     }
 
     public static BackupServiceBuilder WithHttpUpload(this BackupServiceBuilder builder, string targetUri, Action<HttpUploadProcessorOptions>? configureOptions = null) => builder.WithHttpUpload(new Uri(targetUri), configureOptions);
@@ -31,8 +38,7 @@ public static class Extensions {
     public static BackupServiceBuilder WithHttpUpload(this BackupServiceBuilder builder, Uri targetUri, Action<HttpUploadProcessorOptions>? configureOptions = null) {
         var options = new HttpUploadProcessorOptions(targetUri);
         configureOptions?.Invoke(options);
-        builder.Services.AddSingleton<IBackupProcessor>(sp => new HttpUploadProcessor(options, sp.GetRequiredService<ILogger<HttpUploadProcessor>>()) { Priority = builder.NextProcessorPriority });
-        return builder.Next();
+        return builder.WithProcessor<HttpUploadProcessor>(sp => new HttpUploadProcessor(options, sp.GetRequiredService<ILogger<HttpUploadProcessor>>()));
     }
 
 }
