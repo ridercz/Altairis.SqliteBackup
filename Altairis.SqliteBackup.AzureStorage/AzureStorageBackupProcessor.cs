@@ -19,7 +19,7 @@ public class AzureStorageBackupProcessor : IBackupProcessor {
 
     public int Priority { get; set; }
 
-    public async Task<string?> ProcessBackupFile(string backupFilePath, CancellationToken cancellationToken) {
+    public async Task<string> ProcessBackupFile(string backupFilePath, CancellationToken cancellationToken) {
         try {
             // Get or create container
             var container = new BlobContainerClient(this.options.ConnectionString, this.options.ContainerName);
@@ -29,10 +29,9 @@ public class AzureStorageBackupProcessor : IBackupProcessor {
             var blob = container.GetBlobClient(Path.GetFileName(backupFilePath));
             this.logger.LogInformation("Uploading {backupFilePath} to blob {blobUri}.", backupFilePath, blob.Uri.AbsoluteUri);
             _ = await blob.UploadAsync(backupFilePath, cancellationToken);
-            return backupFilePath;
         } catch (Exception ex) {
             this.logger.LogError(ex, "Exception while uploading backup file to Azure Storage.");
-            return null;
         }
+        return backupFilePath;
     }
 }

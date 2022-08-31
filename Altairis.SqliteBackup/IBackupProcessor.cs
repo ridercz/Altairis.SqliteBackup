@@ -2,6 +2,8 @@
 
 public interface IBackupProcessor {
 
-    Task ProcessBackupFile(string backupFilePath);
+    public int Priority { get; set; }
+
+    public Task<string> ProcessBackupFile(string backupFilePath, CancellationToken cancellationToken);
 
 }

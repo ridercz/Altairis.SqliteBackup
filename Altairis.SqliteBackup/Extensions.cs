@@ -10,11 +10,4 @@ public static class Extensions {
         services.AddSingleton(options);
         services.AddHostedService<BackupService>();
     }
-
-    public static void AddSqliteBackupHttpUpload(this IServiceCollection services, Uri targetUri, Action<HttpUploadBackupProcessorOptions>? configureOptions = null) {
-        var options = new HttpUploadBackupProcessorOptions(targetUri);
-        configureOptions?.Invoke(options);
-        services.AddSingleton(options);
-        services.AddSingleton<IBackupProcessor, HttpUploadBackupProcessor>();
-    }
 }
