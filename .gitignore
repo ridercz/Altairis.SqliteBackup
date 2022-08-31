@@ -124,3 +124,4 @@ orleans.codegen.cs
 *.db-wal
 *.bak
 *.bak.gz
+*.lastHash

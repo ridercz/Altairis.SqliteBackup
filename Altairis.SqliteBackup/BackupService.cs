@@ -4,11 +4,13 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace Altairis.SqliteBackup;
 
 public class BackupService : BackgroundService {
     private const string TimestampFormat = "yyyyMMddHHmmss";
+    private const string HashFileExtension = ".lastHash";
 
     private readonly BackupServiceOptions options;
     private readonly ILogger<BackupService> logger;
@@ -50,20 +52,45 @@ public class BackupService : BackgroundService {
                 // Backup database and get backup file name
                 var fileName = await this.PerformBackup(stoppingToken);
 
-                // Call configured backup processors
                 if (fileName != null) {
-                    foreach (var bp in this.orderedBackupProcessors) {
-                        try {
-                            fileName = await bp.ProcessBackupFile(fileName, stoppingToken);
-                        } catch (Exception ex) {
-                            this.logger.LogError(ex, "Backup processor {processorType} with priority {priority} didn't completed successfully. Subsequent processors are skipped.", bp.GetType().ToString(), bp.Priority);
-                            break;
+                    // Perform checksum logic
+                    var continueWithBackup = !this.options.UseChecksum || await this.PerformChecksumCheck(fileName, stoppingToken);
+                    if (continueWithBackup) {
+                        // Call configured backup processors
+                        foreach (var bp in this.orderedBackupProcessors) {
+                            try {
+                                fileName = await bp.ProcessBackupFile(fileName, stoppingToken);
+                            } catch (Exception ex) {
+                                this.logger.LogError(ex, "Backup processor {processorType} with priority {priority} didn't completed successfully. Subsequent processors are skipped.", bp.GetType().ToString(), bp.Priority);
+                                break;
+                            }
                         }
+                    } else {
+                        // Delete the backup, is not changed from last one
+                        File.Delete(fileName);
+                        this.logger.LogInformation("File {fileName} was deleted because is not different from last backup.", fileName);
                     }
                 }
             }
             await Task.Delay(this.options.CheckInterval, stoppingToken);
         }
+    }
+
+    private async Task<bool> PerformChecksumCheck(string fileName, CancellationToken stoppingToken) {
+        // Get last hash
+        var hashFileName = Path.Combine(this.backupFolder, this.backupFileNamePrefix + HashFileExtension);
+        var lastHash = File.Exists(hashFileName) ? await File.ReadAllTextAsync(hashFileName, stoppingToken) : string.Empty;
+
+        // Compute SHA256 hash of backup file
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        using var stream = File.OpenRead(fileName);
+        var currentHashBytes = await sha.ComputeHashAsync(stream, stoppingToken);
+        var currentHash = string.Join(string.Empty, currentHashBytes.Select(x => x.ToString("X2")));
+        await File.WriteAllTextAsync(hashFileName, currentHash, stoppingToken);
+
+        // Compare last hash with current one
+        this.logger.LogDebug("Last known hash is \"{lastHash}\", current hash is \"{currentHash}\".", lastHash, currentHash);
+        return !lastHash.Equals(currentHash, StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task<string?> PerformBackup(CancellationToken stoppingToken) {

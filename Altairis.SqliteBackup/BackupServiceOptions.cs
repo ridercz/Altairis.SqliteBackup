@@ -21,4 +21,6 @@ public class BackupServiceOptions {
 
     public bool UseLocalTime { get; set; } = false;
 
+    public bool UseChecksum { get; set; } = true;
+
 }
