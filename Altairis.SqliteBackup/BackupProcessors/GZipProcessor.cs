@@ -4,10 +4,10 @@ using Microsoft.Extensions.Logging;
 namespace Altairis.SqliteBackup.BackupProcessors;
 
 public class GZipProcessor : IBackupProcessor {
-    private readonly GZipBackupProcessorOptions options;
+    private readonly GZipProcessorOptions options;
     private readonly ILogger<GZipProcessor> logger;
 
-    public GZipProcessor(GZipBackupProcessorOptions options, ILogger<GZipProcessor> logger) {
+    public GZipProcessor(GZipProcessorOptions options, ILogger<GZipProcessor> logger) {
         this.options = options;
         this.logger = logger;
     }
@@ -43,7 +43,7 @@ public class GZipProcessor : IBackupProcessor {
     }
 }
 
-public class GZipBackupProcessorOptions {
+public class GZipProcessorOptions {
 
     private const string DefaultAddExtension = ".gz";
 

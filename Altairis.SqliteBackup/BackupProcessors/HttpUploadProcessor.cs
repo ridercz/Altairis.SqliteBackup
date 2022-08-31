@@ -3,10 +3,10 @@
 namespace Altairis.SqliteBackup.BackupProcessors;
 
 public class HttpUploadProcessor : IBackupProcessor {
-    private readonly HttpUploadBackupProcessorOptions options;
+    private readonly HttpUploadProcessorOptions options;
     private readonly ILogger<HttpUploadProcessor> logger;
 
-    public HttpUploadProcessor(HttpUploadBackupProcessorOptions options, ILogger<HttpUploadProcessor> logger) {
+    public HttpUploadProcessor(HttpUploadProcessorOptions options, ILogger<HttpUploadProcessor> logger) {
         this.options = options;
         this.logger = logger;
     }
@@ -40,11 +40,11 @@ public class HttpUploadProcessor : IBackupProcessor {
 
 }
 
-public class HttpUploadBackupProcessorOptions {
+public class HttpUploadProcessorOptions {
     private const string DefaultContentType = "application/vnd.sqlite3";
     private const string DefaultFieldName = "backupFile";
 
-    public HttpUploadBackupProcessorOptions(Uri targetUri) {
+    public HttpUploadProcessorOptions(Uri targetUri) {
         this.TargetUri = targetUri;
     }
 
