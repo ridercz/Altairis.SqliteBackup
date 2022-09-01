@@ -1,7 +1,7 @@
 # Altairis Sqlite Backup
 
-[![NuGet Status](https://img.shields.io/nuget/v/Altairis.SqliteBackup.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Altairis.SqliteBackup/)
-
+[![Altairis.SqliteBackup](https://img.shields.io/nuget/v/Altairis.SqliteBackup.svg?style=flat-square&label=nuget:%20Altairis.SqliteBackup)](https://www.nuget.org/packages/Altairis.SqliteBackup/)
+[![Altairis.SqliteBackup.AzureStorage](https://img.shields.io/nuget/v/Altairis.SqliteBackup.AzureStorage.svg?style=flat-square&label=nuget:%20Altairis.SqliteBackup.AzureStorage)](https://www.nuget.org/packages/Altairis.SqliteBackup.AzureStorage/)
 
 Sqlite is well-known embedded database, usable also in ASP.NET Core. It's "good enough" for many applications, but of course has its drawbacks compared to traditional databases like Microsoft SQL Server. One of them is the absence of proper automated backup.
 
