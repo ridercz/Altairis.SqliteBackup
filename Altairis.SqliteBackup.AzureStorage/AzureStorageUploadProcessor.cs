@@ -17,9 +17,11 @@ public class AzureStorageUploadProcessor : IBackupProcessor {
 
     public async Task<string> ProcessBackupFile(string backupFilePath, CancellationToken cancellationToken) {
         try {
-            // Get or create container
+            // Get container
             var container = new BlobContainerClient(this.options.ConnectionString, this.options.ContainerName);
-            _ = await container.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+
+            // Create container if needed and enabled in configuration
+            if (this.options.CreateContainer) _ = await container.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
 
             // Create a blob
             var blob = container.GetBlobClient(Path.GetFileName(backupFilePath));

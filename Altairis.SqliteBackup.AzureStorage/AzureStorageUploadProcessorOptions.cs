@@ -14,4 +14,6 @@ public class AzureStorageUploadProcessorOptions {
 
     public string ContentType { get; set; } = DefaultContentType;
 
+    public bool CreateContainer { get; set; } = true;
+
 }

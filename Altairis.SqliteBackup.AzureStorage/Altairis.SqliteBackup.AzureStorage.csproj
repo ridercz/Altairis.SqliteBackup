@@ -10,9 +10,9 @@
 		<Authors>Michal Altair Valášek</Authors>
 		<Company>Altairis, s. r. o.</Company>
 		<Description>Azuer Storage support for automated backup of Sqlite databases for ASP.NET Core web applications.</Description>
-		<Copyright>(c) Michal A. Valášek - Altairis, 2022</Copyright>
+		<Copyright>(c) Michal A. Valášek - Altairis, 2022-2023</Copyright>
 		<PackageProjectUrl>https://github.com/ridercz/Altairis.SqliteBackup</PackageProjectUrl>
-		<Version>1.0.0</Version>
+		<Version>1.1.0</Version>
 		<Product>Altairis Sqlite Backup</Product>
 		<RepositoryUrl>https://github.com/ridercz/Altairis.SqliteBackup.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
