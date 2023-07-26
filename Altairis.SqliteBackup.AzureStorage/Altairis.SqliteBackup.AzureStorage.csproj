@@ -21,6 +21,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageOutputPath>..\Packages</PackageOutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
