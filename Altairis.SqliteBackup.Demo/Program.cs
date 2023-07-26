@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Setup backup of Sqlite database with upload to local site
-builder.Services.AddSqliteBackup(builder.Configuration.GetConnectionString("DefaultConnection"), options => {
+builder.Services.AddSqliteBackup(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("Requied connection string DefaultConnection is not specified."), options => {
     options.BackupInterval = TimeSpan.FromSeconds(10);
     options.CheckInterval = TimeSpan.FromSeconds(3);
     options.FolderName = "App_Data/Backup";
@@ -15,7 +15,7 @@ builder.Services.AddSqliteBackup(builder.Configuration.GetConnectionString("Defa
 })
     .WithGZip()
     .WithHttpUpload("http://localhost:5000/receive-file")
-    .WithAzureStorageUpload(builder.Configuration.GetConnectionString("AzureStorageSAS"))
+    .WithAzureStorageUpload(builder.Configuration.GetConnectionString("AzureStorageSAS") ?? throw new Exception("Requied connection string AzureStorageSAS not specified."))
     .WithFileCleanup("*.bak.gz", 3);
 
 // Register DB context
