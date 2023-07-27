@@ -13,15 +13,20 @@ public class BackupService : BackgroundService {
 
     private readonly BackupServiceOptions options;
     private readonly ILogger<BackupService> logger;
+    private readonly BackupServiceHealthCheck? healthCheck;
     private readonly string backupFolder;
     private readonly string backupFileNamePrefix;
     private readonly string readOnlyConnectionString;
     private readonly IOrderedEnumerable<IBackupProcessor> orderedBackupProcessors;
+    private bool lastBackupSuccessful = false;
 
-    public BackupService(BackupServiceOptions options, ILogger<BackupService> logger, IServiceProvider serviceProvider) {
+    // Constructors
+
+    public BackupService(BackupServiceOptions options, ILogger<BackupService> logger, IServiceProvider serviceProvider, BackupServiceHealthCheck? healthCheck = null) {
         // Read options
         this.options = options;
         this.logger = logger;
+        this.healthCheck = healthCheck;
 
         // Create read-only connection string
         this.readOnlyConnectionString = new SqliteConnectionStringBuilder(this.options.ConnectionString) { Mode = SqliteOpenMode.ReadOnly }.ToString();
@@ -41,6 +46,8 @@ public class BackupService : BackgroundService {
         this.orderedBackupProcessors = serviceProvider.GetServices<IBackupProcessor>().OrderBy(x => x.Priority);
     }
 
+    // Background service implementation
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
         this.logger.LogInformation("Starting backup loop; check interval is {checkInterval}, backup interval is {backupInterval}.", this.options.CheckInterval, this.options.BackupInterval);
         while (!stoppingToken.IsCancellationRequested) {
@@ -56,24 +63,29 @@ public class BackupService : BackgroundService {
             if (timeToBackup <= TimeSpan.Zero) {
                 // Backup database and get backup file name
                 var fileName = await this.PerformBackup(stoppingToken);
-
                 if (fileName != null) {
                     // Perform checksum logic
-                    var continueWithBackup = !this.options.UseChecksum || await this.PerformChecksumCheck(fileName, stoppingToken);
+                    var continueWithBackup = !this.lastBackupSuccessful || !this.options.UseChecksum || await this.PerformChecksumCheck(fileName, stoppingToken);
                     if (continueWithBackup) {
                         // Call configured backup processors
+                        this.lastBackupSuccessful = true;
                         foreach (var bp in this.orderedBackupProcessors) {
                             try {
                                 fileName = await bp.ProcessBackupFile(fileName, stoppingToken);
                             } catch (Exception ex) {
                                 this.logger.LogError(ex, "Backup processor {processorType} with priority {priority} didn't completed successfully. Subsequent processors are skipped.", bp.GetType().ToString(), bp.Priority);
+                                this.healthCheck?.Update(false, $"Backup processor {bp.GetType()} with priority {bp.Priority} didn't completed successfully.", ex);
+                                this.lastBackupSuccessful = false;
                                 break;
                             }
                         }
+                        if (this.lastBackupSuccessful) this.healthCheck?.Update(true, "Backup completed successfully.");
                     } else {
                         // Delete the backup, is not changed from last one
                         File.Delete(fileName);
                         this.logger.LogInformation("File {fileName} was deleted because is not different from last backup.", fileName);
+                        this.healthCheck?.Update(true, "Backup file is not different from last backup.");
+                        this.lastBackupSuccessful = true;
                     }
                 }
             }
@@ -81,6 +93,8 @@ public class BackupService : BackgroundService {
         }
         this.logger.LogInformation("Backup loop stopped.");
     }
+
+    // Helper methods
 
     private async Task<bool> PerformChecksumCheck(string fileName, CancellationToken stoppingToken) {
         // Get last hash
@@ -121,6 +135,7 @@ public class BackupService : BackgroundService {
             return backupFileName;
         } catch (Exception ex) {
             this.logger.LogError(ex, "Exception while performing database backup.");
+            this.healthCheck?.Update(false, "Exception while performing database backup.", ex);
             return null;
         }
     }
