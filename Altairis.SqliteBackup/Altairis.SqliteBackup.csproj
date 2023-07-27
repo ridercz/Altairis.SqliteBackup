@@ -12,7 +12,7 @@
 		<Description>Automated backup of Sqlite databases for ASP.NET Core web applications.</Description>
 		<Copyright>(c) Michal A. Valášek - Altairis, 2022-2023</Copyright>
 		<PackageProjectUrl>https://github.com/ridercz/Altairis.SqliteBackup</PackageProjectUrl>
-		<Version>1.2.1</Version>
+		<Version>1.2.2</Version>
 		<Product>Altairis Sqlite Backup</Product>
 		<RepositoryUrl>https://github.com/ridercz/Altairis.SqliteBackup.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>

@@ -56,6 +56,9 @@ public class BackupService : BackgroundService {
             var lastBackupTimeString = File.Exists(lastBackupTimeFileName) ? await File.ReadAllTextAsync(lastBackupTimeFileName, stoppingToken) : DateTime.MinValue.ToString("s");
             var lastBackupTime = DateTime.ParseExact(lastBackupTimeString, "s", CultureInfo.InvariantCulture);
 
+            // Set inherited last backup time
+            if (lastBackupTime > DateTime.MinValue) this.healthCheck?.UpdateInheritedSuccess(lastBackupTime);
+
             // Check if it's time to backup
             var nextBackupTime = lastBackupTime.Add(this.options.BackupInterval);
             var timeToBackup = nextBackupTime.Subtract(DateTime.Now);
@@ -79,7 +82,10 @@ public class BackupService : BackgroundService {
                                 break;
                             }
                         }
-                        if (this.lastBackupSuccessful) this.healthCheck?.Update(true, "Backup completed successfully.");
+                        if (this.lastBackupSuccessful) {
+                            this.healthCheck?.Update(true, "Backup completed successfully.");
+                            await File.WriteAllTextAsync(lastBackupTimeFileName, DateTime.Now.ToString("s"), stoppingToken);
+                        }
                     } else {
                         // Delete the backup, is not changed from last one
                         File.Delete(fileName);
@@ -128,10 +134,6 @@ public class BackupService : BackgroundService {
             cmd.Parameters.AddWithValue("@FileName", backupFileName);
             await cmd.ExecuteNonQueryAsync(stoppingToken);
             await db.CloseAsync();
-
-            // Update last backup time
-            var lastBackupTimeFileName = Path.Combine(this.backupFolder, this.backupFileNamePrefix + TimestampFileExtension);
-            await File.WriteAllTextAsync(lastBackupTimeFileName, DateTime.Now.ToString("s"), stoppingToken);
             return backupFileName;
         } catch (Exception ex) {
             this.logger.LogError(ex, "Exception while performing database backup.");
