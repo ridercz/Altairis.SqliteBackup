@@ -14,6 +14,8 @@ public static class Extensions {
         return new BackupServiceBuilder(services, options);
     }
 
+    public static IServiceCollection AddSqliteBackupHealthCheck(this IServiceCollection services) => services.AddSingleton<BackupServiceHealthCheck>();
+
     public static BackupServiceBuilder WithProcessor<TProcessor>(this BackupServiceBuilder builder, Func<IServiceProvider, IBackupProcessor> implementationFactory) where TProcessor: IBackupProcessor {
         builder.Services.AddSingleton<IBackupProcessor>(sp => {
             var p = implementationFactory(sp);

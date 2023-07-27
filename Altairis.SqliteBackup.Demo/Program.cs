@@ -20,7 +20,7 @@ builder.Services.AddSqliteBackup(builder.Configuration.GetConnectionString("Defa
     .WithFileCleanup("*.bak.gz", 3);
 
 // Add health check
-builder.Services.AddSingleton<BackupServiceHealthCheck>();
+builder.Services.AddSqliteBackupHealthCheck();
 builder.Services.AddHealthChecks()
     .AddCheck<BackupServiceHealthCheck>("SqliteBackup");
 
