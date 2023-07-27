@@ -28,6 +28,7 @@ public class BackupServiceHealthCheck : IHealthCheck {
     }
 
     public void UpdateInheritedSuccess(DateTime lastSuccessTime) {
+        this.updateReceived = true;
         this.lastSuccessTime = lastSuccessTime;
         this.lastMessage = "Inherited backup state";
     }
