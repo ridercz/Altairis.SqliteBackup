@@ -9,7 +9,7 @@
 		<Title>Altairis Sqlite Backup - Azure Storage Upload</Title>
 		<Authors>Michal Altair Valášek</Authors>
 		<Company>Altairis, s. r. o.</Company>
-		<Description>Azuer Storage support for automated backup of Sqlite databases for ASP.NET Core web applications.</Description>
+		<Description>Azure Storage support for automated backup of Sqlite databases for ASP.NET Core web applications.</Description>
 		<Copyright>(c) Michal A. Valášek - Altairis, 2022-2023</Copyright>
 		<PackageProjectUrl>https://github.com/ridercz/Altairis.SqliteBackup</PackageProjectUrl>
 		<Version>1.1.0</Version>
