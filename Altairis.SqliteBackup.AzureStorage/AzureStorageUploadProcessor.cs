@@ -21,7 +21,10 @@ public class AzureStorageUploadProcessor : IBackupProcessor {
             var container = new BlobContainerClient(this.options.ConnectionString, this.options.ContainerName);
 
             // Create container if needed and enabled in configuration
-            if (this.options.CreateContainer) _ = await container.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+            if (this.options.CreateContainer) {
+                this.logger.LogInformation("Creating container {containerName} in Azure Storage (if it does not already exists).", this.options.ContainerName);
+                await container.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+            }
 
             // Create a blob
             var blob = container.GetBlobClient(Path.GetFileName(backupFilePath));
@@ -31,7 +34,7 @@ public class AzureStorageUploadProcessor : IBackupProcessor {
                     ContentType = this.options.ContentType
                 }
             };
-            _ = await blob.UploadAsync(backupFilePath, options, cancellationToken);
+            await blob.UploadAsync(backupFilePath, options, cancellationToken);
         } catch (Exception ex) {
             this.logger.LogError(ex, "Exception while uploading backup file to Azure Storage.");
         }

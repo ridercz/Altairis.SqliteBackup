@@ -32,7 +32,7 @@ public class BackupService : BackgroundService {
         this.backupFolder = this.options.FolderName ?? Path.GetDirectoryName(db.DataSource) ?? ".";
         this.backupFileNamePrefix = Path.GetFileNameWithoutExtension(db.DataSource) ?? "backup";
         db.Close();
-        logger.LogInformation("Initializing backup service using folder '{backupFolder}' and prefix '{backupFileNamePrefix}'", this.backupFolder, this.backupFileNamePrefix);
+        logger.LogInformation("Initializing backup service using folder '{backupFolder}' and prefix '{backupFileNamePrefix}'.", this.backupFolder, this.backupFileNamePrefix);
 
         // Create directory if it does not already exist
         Directory.CreateDirectory(this.backupFolder);
@@ -42,6 +42,7 @@ public class BackupService : BackgroundService {
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
+        this.logger.LogInformation("Starting backup loop; check interval is {checkInterval}, backup interval is {backupInterval}.", this.options.CheckInterval, this.options.BackupInterval);
         while (!stoppingToken.IsCancellationRequested) {
             // Get last timestamp
             var lastBackupTimeFileName = Path.Combine(this.backupFolder, this.backupFileNamePrefix + TimestampFileExtension);
@@ -78,6 +79,7 @@ public class BackupService : BackgroundService {
             }
             await Task.Delay(this.options.CheckInterval, stoppingToken);
         }
+        this.logger.LogInformation("Backup loop stopped.");
     }
 
     private async Task<bool> PerformChecksumCheck(string fileName, CancellationToken stoppingToken) {
