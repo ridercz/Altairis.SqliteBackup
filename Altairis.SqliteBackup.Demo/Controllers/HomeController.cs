@@ -10,9 +10,6 @@ public class HomeController : Controller {
         this.logger = logger;
     }
 
-    [Route("")]
-    public ActionResult Index() => this.Ok("This web app does not do anything, just backs up the Sqlite database -- see console log.");
-
     [Route("receive-file")]
     public async Task<ActionResult> ReceivePostedFile() {
         // Validate and get the posted file
