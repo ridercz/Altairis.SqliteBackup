@@ -12,7 +12,7 @@ public class BackupServiceHealthCheck : IHealthCheck {
     private readonly TimeSpan healthyThreshold, degradedThreshold, checkInterval;
     private readonly DateTime startTime = DateTime.Now;
     private DateTime lastSuccessTime = DateTime.MinValue;
-    private bool lastState;
+    private bool updateReceived = false;
     private string? lastMessage;
     private Exception? lastException;
 
@@ -28,7 +28,7 @@ public class BackupServiceHealthCheck : IHealthCheck {
     }
 
     public void Update(bool success, string? message = null, Exception? exception = null) {
-        this.lastState = success;
+        this.updateReceived = true;
         this.lastMessage = message;
         this.lastException = exception;
         if (success) this.lastSuccessTime = DateTime.Now;
@@ -37,9 +37,9 @@ public class BackupServiceHealthCheck : IHealthCheck {
 
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default) {
         // Handle special case - too fast check
-        if (DateTime.Now - this.startTime < this.checkInterval) {
+        if (!this.updateReceived && DateTime.Now - this.startTime < this.checkInterval) {
             this.logger.LogDebug("Too fast check, returning degraded status");
-            return Task.FromResult(new HealthCheckResult(HealthStatus.Degraded, "Backup check was not performed yet."));
+            return Task.FromResult(new HealthCheckResult(HealthStatus.Degraded, $"Backup check was not performed yet, try again in {this.checkInterval}."));
         }
 
         // Derive status from last success time
