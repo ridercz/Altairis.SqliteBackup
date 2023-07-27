@@ -28,13 +28,9 @@ public class HttpUploadProcessor : IBackupProcessor {
 
         // POST data
         using var client = this.options.GetHttpClient();
-        try {
-            var response = await client.PostAsync(this.options.TargetUri, data, cancellationToken);
-            _ = response.EnsureSuccessStatusCode();
-            this.logger.LogInformation("File {backupFilePath} was successfully uploaded to {targetUrl}.", backupFilePath, this.options.TargetUri);
-        } catch (Exception ex) {
-            this.logger.LogError(ex, "Error while uploading {backupFilePath} to {targetUrl}.", backupFilePath, this.options.TargetUri);
-        }
+        var response = await client.PostAsync(this.options.TargetUri, data, cancellationToken);
+        _ = response.EnsureSuccessStatusCode();
+        this.logger.LogInformation("File {backupFilePath} was successfully uploaded to {targetUrl}.", backupFilePath, this.options.TargetUri);
         return backupFilePath;
     }
 

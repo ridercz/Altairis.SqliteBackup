@@ -20,12 +20,8 @@ public class FileCleanupProcessor : IBackupProcessor {
         var files = backupFolder.GetFiles(this.mask, SearchOption.TopDirectoryOnly).OrderByDescending(x => x.Name);
         var filesToDelete = files.Skip(this.fileCount);
         foreach (var file in filesToDelete) {
-            try {
-                file.Delete();
-                this.logger.LogInformation("Deleted file {fileName}.", file.FullName);
-            } catch (IOException ioex) {
-                this.logger.LogError(ioex, "Error while deleting file {fileName}.", file.FullName);
-            }
+            file.Delete();
+            this.logger.LogInformation("Deleted file {fileName}.", file.FullName);
         }
         return Task.FromResult(backupFilePath);
     }

@@ -41,11 +41,7 @@ public class GZipProcessor : IBackupProcessor {
             outputFile.Length);
 
         // Delete original file
-        try {
-            if (this.options.DeleteUncompressedFile) inputFile.Delete();
-        } catch (IOException ioex) {
-            this.logger.LogError(ioex, "Error while deleting uncompressed file {fileName}.", inputFile.FullName);
-        }
+        if (this.options.DeleteUncompressedFile) inputFile.Delete();
 
         return outputFile.FullName;
     }
